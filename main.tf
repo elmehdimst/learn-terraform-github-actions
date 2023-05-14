@@ -18,7 +18,7 @@ terraform {
 provider "aws" {
   region = "us-east-1"
 }
-
+/*
 resource "random_pet" "sg" {}
 
 data "aws_ami" "ubuntu" {
@@ -81,4 +81,9 @@ output "web-address" {
 
 output "instance-id" {
   value = aws_instance.web.id
+}*/
+
+module "ec2-instance_example_complete" {
+  source  = "terraform-aws-modules/ec2-instance/aws//examples/complete"
+  version = "5.0.0"
 }
