@@ -1,6 +1,6 @@
 # Copyright (c) HashiCorp, Inc.
 # SPDX-License-Identifier: MPL-2.0
-
+ 
 terraform {
   required_providers {
     aws = {
@@ -16,7 +16,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-west-2"
+  region = "us-east-1"
 }
 
 resource "random_pet" "sg" {}
@@ -42,6 +42,8 @@ resource "aws_instance" "web" {
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.web-sg.id]
 
+  iam_instance_profile = "AmazonEC2RoleforSSM"
+
   user_data = <<-EOF
               #!/bin/bash
               apt-get update
@@ -49,6 +51,10 @@ resource "aws_instance" "web" {
               sed -i -e 's/80/8080/' /etc/apache2/ports.conf
               echo "Hello World" > /var/www/html/index.html
               systemctl restart apache2
+              apt-get install -y snapd
+              snap install amazon-ssm-agent --classic
+              systemctl enable snap.amazon-ssm-agent.amazon-ssm-agent.service
+              systemctl start snap.amazon-ssm-agent.amazon-ssm-agent.service
               EOF
 }
 
@@ -71,4 +77,8 @@ resource "aws_security_group" "web-sg" {
 
 output "web-address" {
   value = "${aws_instance.web.public_dns}:8080"
+}
+
+output "instance-id" {
+  value = aws_instance.web.id
 }
